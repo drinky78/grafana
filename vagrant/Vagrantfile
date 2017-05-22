@@ -1,43 +1,38 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure("2") do |config|
 
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.synced_folder "Files/", "/Vagrant"
+  config.vm.define "Carimali-IoT" do |stat| end
+  config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "public_network", ip: "192.168.0.10", bridge: "en1: Wi-Fi (AirPort)"
 
-
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  
-  #monitoring
-  config.vm.define "monitoring" do |monitoring|
-    monitoring.vm.provider "virtualbox" do |v|
-      v.name = "monitoring"
-    end
-    #TODO create my box with just centOS
-    monitoring.vm.box = "chef/centos-7.0"
-
-  
-    #influxdb
-    monitoring.vm.network "forwarded_port", :guest => 8083, :host => 8083
-    monitoring.vm.network "forwarded_port", :guest => 8090, :host => 8090
-    monitoring.vm.network "forwarded_port", :guest => 8099, :host => 8099
-    monitoring.vm.network "forwarded_port", :guest => 8086, :host => 8086
-
-    
-    #graphite
-    monitoring.vm.network "forwarded_port", :guest => 2003, :host => 2003
-    
-    #statd
-    monitoring.vm.network "forwarded_port", :guest => 8125, :host => 8125 , protocol: "udp"
-
-    #grafana
-    monitoring.vm.network "forwarded_port", :guest => 8080, :host => 8080
-    monitoring.vm.synced_folder "box/", "/tmp/monitoring"
-
-
-    monitoring.vm.provision "shell", path: "box/monitoring.sh"
-  
-
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--memory", 2048]
+    vb.customize ["modifyvm", :id, "--cpus", 2]
   end
-end
+
+  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+  config.ssh.forward_agent = true
+
+  config.vm.provision "shell" do |sh|
+    sh.path ="Scripts/influx.sh"
+  end 
+
+  config.vm.provision "shell" do |sh|
+    sh.path ="Scripts/grafana.sh"
+  end 
+
+  config.vm.provision "shell" do |sh|
+    sh.path ="Scripts/telegraf.sh"
+  end 
+
+  config.vm.provision "shell", run: "always", inline: <<-SHELL
+    sudo service grafana-server restart
+    sudo service telegraf restart
+    sudo service influxdb restart
+    SHELL
+  end
+

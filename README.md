@@ -11,8 +11,8 @@
 
 ##Information
 
-* [Grafana](http://localhost:8080/grafana)
-* [Influxdb](http://localhost:8083)
+* [Grafana](http://192.168.33.10:3000)
+* [Influxdb](http://192.168.33.10:8086)
 
 
 ###Command to send a metric

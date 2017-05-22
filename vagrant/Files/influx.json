@@ -1,0 +1,15 @@
+{
+    "name":"influx",
+    "type":"influxdb",
+    "url":"http://localhost:8086",
+    "access":"proxy",
+    "jsonData":{},
+    "secureJsonFields":{},
+    "isDefault":true,
+    "basicAuth":true,
+    "basicAuthUser":"root",
+    "basicAuthPassword":"root",
+    "database":"demo",
+    "user":"root",
+    "password":"root"
+}
